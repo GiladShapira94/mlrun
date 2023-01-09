@@ -31,6 +31,14 @@ class PlotArtifact(Artifact):
     def __init__(
         self, key=None, body=None, is_inline=False, target_path=None, title=None
     ):
+        """
+        :param key: PlotArtifact key
+        :param body: will use the body as the PlotArtifact content
+        :param target_path: The target path of the PlotArtifact. (cannot be a relative path)
+                            If not provided, the PlotArtifact will be stored in the default PlotArtifact path.
+                            If provided and is a remote path (e.g. s3://bucket/path), no PlotArtifact will be uploaded
+        :param title: PlotArtifact title
+        """
         super().__init__(key, body, format="html", target_path=target_path)
         self.metadata.description = title
 
@@ -101,6 +109,17 @@ class ChartArtifact(Artifact):
         chart=None,
         target_path=None,
     ):
+        """
+        :param key: ChartArtifact key
+        :param data: Chart data
+        :param header: Chart header
+        :param options: Chart options
+        :param title: ChartArtifact title
+        :param chart: Chart type
+        :param target_path: The target path of the ChartArtifact. (cannot be a relative path)
+                            If not provided, the ChartArtifact will be stored in the default ChartArtifact path.
+                            If provided and is a remote path (e.g. s3://bucket/path), no ChartArtifact will be uploaded
+        """
         data = [] if data is None else data
         options = {} if options is None else options
         super().__init__(key, target_path=target_path)

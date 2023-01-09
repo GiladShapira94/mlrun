@@ -58,6 +58,16 @@ class TableArtifact(Artifact):
         header=None,
         schema=None,
     ):
+        """
+        :param key: TableArtifact key
+        :param body: will use the body as the TableArtifact content
+        :param df: dataframe object
+        :param viewer: Kubeflow viewer type
+        :param visible: Id the data sould be visible
+        :param format: The format of the artifact. (e.g. csv, json, html, etc.)
+        :param header: TableArtifact data header
+        :param schema: TableArtifact schema
+        """
 
         if key:
             key_suffix = pathlib.Path(key).suffix
@@ -140,6 +150,22 @@ class DatasetArtifact(Artifact):
         label_column: str = None,
         **kwargs,
     ):
+        """
+        :param key: DatasetArtifact key
+        :param df: dataframe object
+        :param preview: number of lines to store as preview in the artifact metadata
+        :param format: optional, format to use - default is parquet (e.g. csv, parquet, ..)
+        :param stats: calculate and store dataset stats in the artifact metadata
+        :param target_path: The target path of the DatasetArtifact. (cannot be a relative path)
+                            If not provided, the DatasetArtifact will be stored in the default DatasetArtifact path.
+                            If provided and is a remote path (e.g. s3://bucket/path), no DatasetArtifact will be uploaded
+                            as it already exists.
+        :param extra_data: key/value list of extra files/charts to link with this dataset
+        :param column_metadata: key/value list of extra files/charts to link with this dataset
+        :param ignore_preview_limits: Set to True to ignore preview limits
+        :param label_column: name of the label column (the one holding the target (y) values)
+        :param kwargs: Arguments to pass to the DatasetArtifact class.
+        """
 
         format = (format or "").lower()
         super().__init__(key, None, format=format, target_path=target_path)

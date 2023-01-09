@@ -181,6 +181,23 @@ class Artifact(ModelObj):
         spec: ArtifactSpec = None,
         src_path: str = None,
     ):
+        """
+        :param key: artifact key
+        :param body: will use the body as the artifact content
+        :param viewer: Kubeflow viewer type
+        :param is_inline:
+        :param format: The format of the artifact. (e.g. csv, json, html, etc.)
+        :param size: Artifact size, calculate when uploading the artifact
+        :param target_path:  The target path of the artifact. (cannot be a relative path)
+                            If not provided, the artifact will be stored in the default artifact path.
+                            If provided and is a remote path (e.g. s3://bucket/path), no artifact will be uploaded
+                            as it already exists.
+        :param project: project artifact name, if not define using
+        :param metadata: Artifact metadata
+        :param spec: Artifact spec
+        :param src_path: The local path of the artifact. If remote path is provided then the artifact won't be
+                            uploaded and this parameter will be used as the target path.
+        """
         self._metadata = None
         self.metadata = metadata
         self._spec = None
@@ -951,6 +968,18 @@ class LinkArtifact(Artifact):
         metadata: ArtifactMetadata = None,
         spec: LinkArtifactSpec = None,
     ):
+        """
+        :param key: LinkArtifact key
+        :param target_path: The target path of the LinkArtifact. (cannot be a relative path)
+                            If not provided, the LinkArtifact will be stored in the default LinkArtifact path.
+                            If provided and is a remote path (e.g. s3://bucket/path), no LinkArtifact will be uploaded.
+        :param link_iteration: LinkArtifact link iteration
+        :param link_key: LinkArtifact link key
+        :param link_tree: LinkArtifact link tree
+        :param project: LinkArtifact project name
+        :param metadata: LinkArtifact metadata
+        :param spec: LinkArtifact spec
+        """
         super().__init__(
             key, target_path=target_path, project=project, metadata=metadata, spec=spec
         )

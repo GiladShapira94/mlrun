@@ -138,6 +138,26 @@ class ModelArtifact(Artifact):
         model_dir=None,
         **kwargs,
     ):
+        """
+        :param key: ModelArtifact key
+        :param body:  will use the body as the ModelArtifact content
+        :param format: The format of the ModelArtifact.
+        :param model_file: path to the local model file we upload (see also model_dir) or to a model file data url (e.g. http://host/path/model.pkl)
+        :param metrics:  key/value dict of model metrics
+        :param target_path: The target path of the ModelArtifact. (cannot be a relative path)
+                            If not provided, the ModelArtifact will be stored in the default artifact path.
+                            If provided and is a remote path (e.g. s3://bucket/path), no ModelArtifact will be uploaded
+        :param parameters: key/value dict of model parameters
+        :param inputs: ordered list of model input features (name, type, ..)
+        :param outputs: ordered list of model output/result elements (name, type, ..)
+        :param framework: name of the ML framework
+        :param algorithm: training algorithm name
+        :param feature_vector: feature store feature vector uri (store://feature-vectors/<project>/<name>[:tag])
+        :param feature_weights: list of feature weights, one per input column
+        :param extra_data: key/value list of extra files/charts to link with this dataset value can be absolute path | relative path (to model dir) | bytes | artifact object
+        :param model_dir: path to the local dir holding the model file and extra files
+        :param kwargs: Arguments to pass to the ModelArtifact class.
+        """
 
         super().__init__(key, body, format=format, target_path=target_path, **kwargs)
         if model_file and "://" in model_file:
