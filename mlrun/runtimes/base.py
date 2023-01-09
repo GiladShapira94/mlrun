@@ -1215,6 +1215,7 @@ class BaseRuntime(ModelObj):
 
         :returns: self
         """
+        project = mlrun.get_or_create_project()
         if self.kind == "handler":
             raise ValueError(
                 "cannot export local handler function, use "
@@ -1229,6 +1230,7 @@ class BaseRuntime(ModelObj):
         stores = store_manager.set(secrets)
         target = target or "function.yaml"
         datastore, subpath = stores.get_or_create_store(target)
+        subpath = os.path.join()
         datastore.put(subpath, data)
         logger.info(f"function spec saved to path: {target}")
         return self
