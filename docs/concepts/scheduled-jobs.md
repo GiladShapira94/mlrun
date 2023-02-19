@@ -38,8 +38,14 @@ This runs the job every hour. An excellent resource for generating Cron schedule
 
 ## Scheduling a workflow
 
-After loading the project (`load_project`), run the project with the scheduled workflow:
-
+After loading a project (`load_project`) from a remote source e.g GitHub, that contains functions and workflow (workflow named main).
+run the project with the scheduled workflow:
 ```
 project.run("main", schedule='0 * * * *')
 ```
+```{admonition} Note
+1. Remote workflows can only be performed by a project with remote source e.g git://github.com/mlrun/something.git, http://some/url/file.zip or http://some/url/file.tar.gz, 
+you can set a project source with [project.set_source](https://docs.mlrun.org/en/stable/api/mlrun.projects.html?highlight=set_source#mlrun.projects.MlrunProject.set_source) method.
+2. For set workflow you can use [project.set_workflow](https://docs.mlrun.org/en/stable/api/mlrun.projects.html?highlight=set_workflow#mlrun.projects.MlrunProject.set_workflow) method.
+```
+
