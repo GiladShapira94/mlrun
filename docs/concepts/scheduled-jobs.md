@@ -45,7 +45,7 @@ project.run("main", schedule='0 * * * *')
 ```
 ```{admonition} Note
 1. Remote workflows can only be performed by a project with remote source e.g git://github.com/mlrun/something.git, http://some/url/file.zip or http://some/url/file.tar.gz, 
-you can set a project source with [project.set_source](https://docs.mlrun.org/en/stable/api/mlrun.projects.html?highlight=set_source#mlrun.projects.MlrunProject.set_source) method.
-2. For set workflow you can use [project.set_workflow](https://docs.mlrun.org/en/stable/api/mlrun.projects.html?highlight=set_workflow#mlrun.projects.MlrunProject.set_workflow) method.
+you can set a project source with `project.set_source` method.
+2. For set workflow you can use `project.set_workflow` method.
 ```
 
