@@ -43,10 +43,14 @@ run the project with the scheduled workflow:
 ```
 project.run("main", schedule='0 * * * *')
 ```
+For Deleting exciting scheduled workflow you can run the example below, or delete it from the UI:
+```
+project.run("main", schedule='0 * * * *',override=True)
+```
 ```{admonition} Note
-1. Remote workflows can only be performed by a project with remote source e.g git://github.com/mlrun/something.git, http://some/url/file.zip or http://some/url/file.tar.gz, 
-you can set a project source with `project.set_source` method.
-2. For set workflow you can use `project.set_workflow` method.
-3. Example for a remote GitHub project see - https://github.com/mlrun/project-demo
+1. Remote workflows can only be performed by a project with **remote** source (git://github.com/mlrun/something.git, http://some/url/file.zip or http://some/url/file.tar.gz).
+    * To set project source use the `project.set_source` method.
+    * To set workflow use the `project.set_workflow` method.
+3. Example for a remote GitHub project - https://github.com/mlrun/project-demo
 ```
 
