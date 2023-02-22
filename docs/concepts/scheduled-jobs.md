@@ -48,9 +48,9 @@ For Deleting exciting scheduled workflow you can run the example below, or delet
 project.run("main", schedule='0 * * * *',override=True)
 ```
 ```{admonition} Note
-1. Remote workflows can only be performed by a project with **remote** source (git://github.com/mlrun/something.git, http://some/url/file.zip or http://some/url/file.tar.gz).
+1. Remote workflows can only be performed by a project with a **remote** source (git://github.com/mlrun/something.git, http://some/url/file.zip or http://some/url/file.tar.gz).
     * To set project source use the `project.set_source` method.
     * To set workflow use the `project.set_workflow` method.
-3. Example for a remote GitHub project - https://github.com/mlrun/project-demo
+2. Example for a remote GitHub project - https://github.com/mlrun/project-demo
 ```
 
