@@ -466,13 +466,13 @@ def verify_limits(
     gpus=None,
     gpu_type="nvidia.com/gpu",
 ):
-    if mem:
+    if mem and "{{pipelineparam:op" not in mem:
         verify_field_regex(
             f"function.spec.{resources_field_name}.limits.memory",
             mem,
             mlrun.utils.regex.k8s_resource_quantity_regex,
         )
-    if cpu:
+    if cpu and "{{pipelineparam:op" not in cpu:
         verify_field_regex(
             f"function.spec.{resources_field_name}.limits.cpu",
             cpu,
@@ -493,13 +493,13 @@ def verify_requests(
     mem=None,
     cpu=None,
 ):
-    if mem:
+    if mem and "{{pipelineparam:op" not in mem:
         verify_field_regex(
             f"function.spec.{resources_field_name}.requests.memory",
             mem,
             mlrun.utils.regex.k8s_resource_quantity_regex,
         )
-    if cpu:
+    if cpu and "{{pipelineparam:op" not in cpu:
         verify_field_regex(
             f"function.spec.{resources_field_name}.requests.cpu",
             cpu,
