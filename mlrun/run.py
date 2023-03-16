@@ -484,7 +484,7 @@ def import_function(url="", secrets=None, db="", project=None, new_name=None):
     project = project or mlrun.mlconf.default_project
     # When we're importing from the hub we want to assign to a target project, otherwise any store on it will
     # simply default to the default project
-    if project and is_hub_uri:
+    if project:
         function.metadata.project = project
     if new_name:
         function.metadata.name = mlrun.utils.helpers.normalize_name(new_name)
