@@ -141,6 +141,7 @@ class NuclioSpec(KubeResourceSpec):
         "function_handler",
         "nuclio_runtime",
         "base_image_pull",
+        "target_cpu"
     ]
 
     def __init__(
@@ -1458,6 +1459,9 @@ def compile_function_config(
 
     if function.spec.service_account:
         nuclio_spec.set_config("spec.serviceAccount", function.spec.service_account)
+
+    if function.spec.target_cpu:
+        nuclio_spec.set_config("spec.targetCPU", function.spec.target_cpu)
 
     if function.spec.security_context:
         nuclio_spec.set_config(
