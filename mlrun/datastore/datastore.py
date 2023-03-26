@@ -174,7 +174,7 @@ class StoreManager:
                 url, project, allow_empty_resources, secrets
             )
 
-        store, subpath = self.get_or_create_store(url, secrets=secrets)
+        store, subpath = self.get_or_create_store(url, secrets=secrets or self._secrets)
         return DataItem(key, store, subpath, url, meta=meta, artifact_url=artifact_url)
 
     def get_or_create_store(self, url, secrets: dict = None) -> (DataStore, str):

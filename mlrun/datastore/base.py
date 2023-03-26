@@ -532,7 +532,7 @@ class HttpStore(DataStore):
         raise ValueError("unimplemented")
 
     def get(self, key, size=None, offset=0):
-        data = http_get(self.url + self._join(key), None, self.auth)
+        data = http_get(self.url + self._join(key), self._secrets, self.auth)
         if offset:
             data = data[offset:]
         if size:
