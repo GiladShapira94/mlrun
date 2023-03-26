@@ -480,6 +480,8 @@ def import_function(url="", secrets=None, db="", project=None, new_name=None):
             raise KeyError(f"function {name}:{tag} not found in the DB")
     else:
         url, is_hub_uri = extend_hub_uri_if_needed(url)
+        if mlrun.get_secret_or_env("GIT_TOKEN"):
+            secrets = {'GIT_TOKEN':mlrun.get_secret_or_env("GIT_TOKEN")}
         runtime = import_function_to_dict(url, secrets)
     function = new_function(runtime=runtime)
     project = project or mlrun.mlconf.default_project
