@@ -14,6 +14,7 @@
 
 import logging
 import os
+import string
 import typing
 from enum import Enum
 from functools import cached_property
@@ -92,7 +93,24 @@ class HumanReadableFormatter(_BaseFormatter):
             record_with.update(exc_info=format_exception(*record.exc_info))
         return record_with
 
-
+class CUSTOMFormatter(HumanReadableFormatter):
+    def format(self, record) -> str:
+        more = self._resolve_more(record)
+        custom_format = os.environ.get("CUSTOM_LOGGER_FORMAT",None)
+        if custom_format:
+            record_dict = record.__dict__
+            try:
+                custom_format = custom_format.format(timestemp=self.formatTime(record, self.datefmt),level=record.levelname.lower(),message=record.getMessage().rstrip(),more=more or '',**record_dict)
+            except Exception as e:
+                custom_format = None
+                logging.warning(f"Failed to create custom logger due to missing labels in log record {e}")
+        _format =  custom_format or (
+            f"> {self.formatTime(record, self.datefmt)} "
+            f"[{record.levelname.lower()}] "
+            f"{record.getMessage().rstrip()}"
+            f"{more}"
+        )
+        return _format
 class HumanReadableExtendedFormatter(HumanReadableFormatter):
     _colors = {
         logging.NOTSET: "",
@@ -272,17 +290,19 @@ class FormatterKinds(Enum):
     HUMAN = "human"
     HUMAN_EXTENDED = "human_extended"
     JSON = "json"
+    CUSTOM = "custom"
 
 
 def resolve_formatter_by_kind(
     formatter_kind: FormatterKinds,
 ) -> type[
-    typing.Union[HumanReadableFormatter, HumanReadableExtendedFormatter, JSONFormatter]
+    typing.Union[HumanReadableFormatter, HumanReadableExtendedFormatter, JSONFormatter,CUSTOMFormatter]
 ]:
     return {
         FormatterKinds.HUMAN: HumanReadableFormatter,
         FormatterKinds.HUMAN_EXTENDED: HumanReadableExtendedFormatter,
         FormatterKinds.JSON: JSONFormatter,
+        FormatterKinds.CUSTOM: CUSTOMFormatter,
     }[formatter_kind]
 
 
