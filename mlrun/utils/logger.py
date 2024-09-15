@@ -26,6 +26,7 @@ import orjson
 import pydantic
 
 from mlrun.config import config
+from mlrun.errors import MLRunValueError
 
 
 class _BaseFormatter(logging.Formatter):
@@ -96,14 +97,21 @@ class HumanReadableFormatter(_BaseFormatter):
 class CUSTOMFormatter(HumanReadableFormatter):
     def format(self, record) -> str:
         more = self._resolve_more(record)
-        custom_format = os.environ.get("CUSTOM_LOGGER_FORMAT",None)
-        if custom_format:
-            record_dict = record.__dict__
-            try:
+        custom_format = config.custom_format
+        try:
+            if custom_format:
+                default_keys = ["timestemp","level","message","more"]
+                formatter = string.Formatter()
+                custom_format_keys = [key for _, key, _, _ in formatter.parse(custom_format) if key is not None]
+                fail_on_missing_default_flags = [default_key for default_key in default_keys if default_key not in custom_format_keys ]
+                if fail_on_missing_default_flags:
+                    raise MLRunValueError(f'Custom loggers must include those keys within the logger format, {", ".join(default_keys)}'
+                          f' please add those key/keys: {", ".join(fail_on_missing_default_flags)}')
+                record_dict = record.__dict__
+
                 custom_format = custom_format.format(timestemp=self.formatTime(record, self.datefmt),level=record.levelname.lower(),message=record.getMessage().rstrip(),more=more or '',**record_dict)
-            except Exception as e:
-                custom_format = None
-                logging.warning(f"Failed to create custom logger due to missing labels in log record {e}")
+        except Exception as e:
+            raise MLRunValueError(f"Failed to create custom logger due to missing labels in the log record {e}")
         _format =  custom_format or (
             f"> {self.formatTime(record, self.datefmt)} "
             f"[{record.levelname.lower()}] "

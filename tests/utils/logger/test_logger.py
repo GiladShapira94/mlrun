@@ -22,7 +22,7 @@ import pytest
 
 from mlrun.utils.helpers import now_date
 from mlrun.utils.logger import FormatterKinds, Logger, create_logger
-
+import mlrun
 
 class ArbitraryClassForLogging:
     def __init__(self, name):
@@ -177,3 +177,23 @@ def test_child_logger():
     # validate parent and child log lines
     assert "test-logger:debug" in log_lines[0]
     assert "test-logger.child:debug" in log_lines[1]
+
+def test_custom_logger():
+    stream = StringIO()
+    format = "> {timestemp} [{level}] Running module: {module} {message} {more}"
+    current_time = datetime.datetime.now()
+
+    # Format the current time in the same format as the given timestamp
+    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S,%f")[:-3]
+    expected_logger = f"> {formatted_time} [debug] Running module: logger test custom"
+    mlrun.mlconf.custom_format = format
+    logger = create_logger(
+        "debug",
+        name="test-logger",
+        stream=stream,
+        formatter_kind=FormatterKinds.CUSTOM.name,
+    )
+    logger.debug("test custom")
+    log_lines = stream.getvalue().strip().splitlines()
+    assert log_lines[0] == expected_logger
+
