@@ -20,9 +20,10 @@ from io import StringIO
 import pydantic
 import pytest
 
+import mlrun
 from mlrun.utils.helpers import now_date
 from mlrun.utils.logger import FormatterKinds, Logger, create_logger
-import mlrun
+
 
 class ArbitraryClassForLogging:
     def __init__(self, name):
@@ -178,9 +179,10 @@ def test_child_logger():
     assert "test-logger:debug" in log_lines[0]
     assert "test-logger.child:debug" in log_lines[1]
 
+
 def test_custom_logger():
     stream = StringIO()
-    format = "> {timestemp} [{level}] Running module: {module} {message} {more}"
+    format = "> {timestamp} [{level}] Running module: {module} {message} {more}"
     current_time = datetime.datetime.now()
 
     # Format the current time in the same format as the given timestamp
@@ -196,4 +198,3 @@ def test_custom_logger():
     logger.debug("test custom")
     log_lines = stream.getvalue().strip().splitlines()
     assert log_lines[0] == expected_logger
-

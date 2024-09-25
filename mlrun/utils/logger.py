@@ -26,7 +26,6 @@ import orjson
 import pydantic
 
 from mlrun.config import config
-from mlrun.errors import MLRunValueError
 
 
 class _BaseFormatter(logging.Formatter):
@@ -94,31 +93,59 @@ class HumanReadableFormatter(_BaseFormatter):
             record_with.update(exc_info=format_exception(*record.exc_info))
         return record_with
 
+
 class CUSTOMFormatter(HumanReadableFormatter):
+    """
+    To use Custom looger the use need to define two env vars:
+    1. "MLRUN_LOG_FORMATTER" = "custom" - change the default log formatter for the run
+    2. "MLRUN_CUSTOM_FORMAT" = "> {timestamp} [{level}] Running module: {module} {message} {more}" - the format for the run logger
+        * Please note that your custom format must include those 4 fields - timestamp, level, message and more
+    If the custom format was not properly configured, MLRun will use the default logger and provide a warning to indicate why it did not work.
+    """
+
     def format(self, record) -> str:
         more = self._resolve_more(record)
         custom_format = config.custom_format
         try:
             if custom_format:
-                default_keys = ["timestemp","level","message","more"]
+                default_keys = ["timestamp", "level", "message", "more"]
                 formatter = string.Formatter()
-                custom_format_keys = [key for _, key, _, _ in formatter.parse(custom_format) if key is not None]
-                fail_on_missing_default_flags = [default_key for default_key in default_keys if default_key not in custom_format_keys ]
+                custom_format_keys = [
+                    key
+                    for _, key, _, _ in formatter.parse(custom_format)
+                    if key is not None
+                ]
+                fail_on_missing_default_flags = [
+                    default_key
+                    for default_key in default_keys
+                    if default_key not in custom_format_keys
+                ]
                 if fail_on_missing_default_flags:
-                    raise MLRunValueError(f'Custom loggers must include those keys within the logger format, {", ".join(default_keys)}'
-                          f' please add those key/keys: {", ".join(fail_on_missing_default_flags)}')
+                    logging.warning(
+                        f'Custom loggers must include those keys within the logger format, {", ".join(default_keys)}'
+                        f'please add those key/keys: {", ".join(fail_on_missing_default_flags)}'
+                    )
                 record_dict = record.__dict__
-
-                custom_format = custom_format.format(timestemp=self.formatTime(record, self.datefmt),level=record.levelname.lower(),message=record.getMessage().rstrip(),more=more or '',**record_dict)
+                custom_format = custom_format.format(
+                    timestamp=self.formatTime(record, self.datefmt),
+                    level=record.levelname.lower(),
+                    message=record.getMessage().rstrip(),
+                    more=more or "",
+                    **record_dict,
+                )
         except Exception as e:
-            raise MLRunValueError(f"Failed to create custom logger due to missing labels in the log record {e}")
-        _format =  custom_format or (
+            logging.warning(
+                f"Failed to create custom logger due to missing labels in the log record {e}"
+            )
+        _format = custom_format or (
             f"> {self.formatTime(record, self.datefmt)} "
             f"[{record.levelname.lower()}] "
             f"{record.getMessage().rstrip()}"
             f"{more}"
         )
         return _format
+
+
 class HumanReadableExtendedFormatter(HumanReadableFormatter):
     _colors = {
         logging.NOTSET: "",
@@ -304,7 +331,12 @@ class FormatterKinds(Enum):
 def resolve_formatter_by_kind(
     formatter_kind: FormatterKinds,
 ) -> type[
-    typing.Union[HumanReadableFormatter, HumanReadableExtendedFormatter, JSONFormatter,CUSTOMFormatter]
+    typing.Union[
+        HumanReadableFormatter,
+        HumanReadableExtendedFormatter,
+        JSONFormatter,
+        CUSTOMFormatter,
+    ]
 ]:
     return {
         FormatterKinds.HUMAN: HumanReadableFormatter,
