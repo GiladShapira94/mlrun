@@ -27,6 +27,8 @@ import pydantic
 
 from mlrun.config import config
 
+from mlrun.errors import MLRunValueError
+
 
 class _BaseFormatter(logging.Formatter):
     def _json_dump(self, json_object):
@@ -121,8 +123,8 @@ class CUSTOMFormatter(HumanReadableFormatter):
                     if default_key not in custom_format_keys
                 ]
                 if fail_on_missing_default_flags:
-                    logging.warning(
-                        f'Custom loggers must include those keys within the logger format, {", ".join(default_keys)}'
+                    MLRunValueError(
+                        f'Custom loggers must include those keys within the logger format, {", ".join(default_keys)} '
                         f'please add those key/keys: {", ".join(fail_on_missing_default_flags)}'
                     )
                 record_dict = record.__dict__
@@ -134,7 +136,8 @@ class CUSTOMFormatter(HumanReadableFormatter):
                     **record_dict,
                 )
         except Exception as e:
-            logging.warning(
+            print(e)
+            MLRunValueError(
                 f"Failed to create custom logger due to missing labels in the log record {e}"
             )
         _format = custom_format or (
