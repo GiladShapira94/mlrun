@@ -332,21 +332,21 @@ class HTTPRunDB(RunDBInterface):
         first_page_params["page"] = 1
         first_page_params["page-size"] = config.httpdb.pagination.default_page_size
         response = _api_call(first_page_params)
-        page_token = response.json().get("pagination", {}).get("page-token")
-        if not page_token:
-            yield response
-            return
 
-        params_with_page_token = deepcopy(params) or {}
-        params_with_page_token["page-token"] = page_token
+        yield response
+        page_token = response.json().get("pagination", {}).get("page-token", None)
+
         while page_token:
-            yield response
             try:
-                response = _api_call(params_with_page_token)
+                # Use the page token to get the next page.
+                # No need to supply any other parameters as the token informs the pagination cache
+                # which parameters to use.
+                response = _api_call({"page-token": page_token})
             except mlrun.errors.MLRunNotFoundError:
                 # pagination token expired
                 break
 
+            yield response
             page_token = response.json().get("pagination", {}).get("page-token", None)
 
     @staticmethod
@@ -2754,7 +2754,7 @@ class HTTPRunDB(RunDBInterface):
         deletion_strategy: Union[
             str, mlrun.common.schemas.DeletionStrategy
         ] = mlrun.common.schemas.DeletionStrategy.default(),
-    ):
+    ) -> None:
         """Delete a project.
 
         :param name: Name of the project to delete.
@@ -2773,7 +2773,7 @@ class HTTPRunDB(RunDBInterface):
             "DELETE", f"projects/{name}", error_message, headers=headers, version="v2"
         )
         if response.status_code == http.HTTPStatus.ACCEPTED:
-            logger.info("Project is being deleted", project_name=name)
+            logger.info("Waiting for project to be deleted", project_name=name)
             background_task = mlrun.common.schemas.BackgroundTask(**response.json())
             background_task = self._wait_for_background_task_to_reach_terminal_state(
                 background_task.metadata.name
@@ -2783,10 +2783,17 @@ class HTTPRunDB(RunDBInterface):
                 == mlrun.common.schemas.BackgroundTaskState.succeeded
             ):
                 logger.info("Project deleted", project_name=name)
-                return
+            elif (
+                background_task.status.state
+                == mlrun.common.schemas.BackgroundTaskState.failed
+            ):
+                logger.error(
+                    "Project deletion failed",
+                    project_name=name,
+                    error=background_task.status.error,
+                )
         elif response.status_code == http.HTTPStatus.NO_CONTENT:
             logger.info("Project deleted", project_name=name)
-            return
 
     def store_project(
         self,
