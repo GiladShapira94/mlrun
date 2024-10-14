@@ -110,6 +110,7 @@ class CUSTOMFormatter(HumanReadableFormatter):
         logger = create_logger("INFO", "human", "logger", sys.stdout)
         more = self._resolve_more(record)
         custom_format = config.custom_format
+        _custom_format = None
         try:
             if custom_format:
                 default_keys = ["timestamp", "level", "message", "more"]
@@ -130,7 +131,7 @@ class CUSTOMFormatter(HumanReadableFormatter):
                         f'your format is missing: {", ".join(fail_on_missing_default_flags)}'
                     )
                 record_dict = record.__dict__
-                _format = custom_format.format(
+                _custom_format = custom_format.format(
                     timestamp=self.formatTime(record, self.datefmt),
                     level=record.levelname.lower(),
                     message=record.getMessage().rstrip(),
@@ -147,13 +148,14 @@ class CUSTOMFormatter(HumanReadableFormatter):
                 f"{record.getMessage().rstrip()}"
                 f"{more}"
             )
-        except:
-            _format = (
-                f"> {self.formatTime(record, self.datefmt)} "
-                f"[{record.levelname.lower()}] "
-                f"{record.getMessage().rstrip()}"
-                f"{more}"
-            )
+        except Exception as e:
+            logger.warning(e)
+        _format =_custom_format or (
+            f"> {self.formatTime(record, self.datefmt)} "
+            f"[{record.levelname.lower()}] "
+            f"{record.getMessage().rstrip()}"
+            f"{more}"
+        )
         return _format
 
 
