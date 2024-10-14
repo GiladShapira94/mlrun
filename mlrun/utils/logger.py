@@ -15,6 +15,7 @@
 import logging
 import os
 import string
+import sys
 import typing
 from enum import Enum
 from functools import cached_property
@@ -106,6 +107,7 @@ class CUSTOMFormatter(HumanReadableFormatter):
     """
 
     def format(self, record) -> str:
+        logger = create_logger("INFO", "human", "logger", sys.stdout)
         more = self._resolve_more(record)
         custom_format = config.custom_format
         try:
@@ -123,29 +125,35 @@ class CUSTOMFormatter(HumanReadableFormatter):
                     if default_key not in custom_format_keys
                 ]
                 if fail_on_missing_default_flags:
-                    MLRunValueError(
+                    logger.warning(
                         f'Custom loggers must include those keys within the logger format, {", ".join(default_keys)} '
-                        f'please add those key/keys: {", ".join(fail_on_missing_default_flags)}'
+                        f'your format is missing: {", ".join(fail_on_missing_default_flags)}'
                     )
                 record_dict = record.__dict__
-                custom_format = custom_format.format(
+                _format = custom_format.format(
                     timestamp=self.formatTime(record, self.datefmt),
                     level=record.levelname.lower(),
                     message=record.getMessage().rstrip(),
                     more=more or "",
                     **record_dict,
                 )
-        except Exception as e:
-            print(e)
-            MLRunValueError(
-                f"Failed to create custom logger due to missing labels in the log record {e}"
+        except KeyError as e:
+            logger.warning(
+                    f"Failed to create custom logger due to missing format key in the log record {e}"
+                )
+            _format = (
+                f"> {self.formatTime(record, self.datefmt)} "
+                f"[{record.levelname.lower()}] "
+                f"{record.getMessage().rstrip()}"
+                f"{more}"
             )
-        _format = custom_format or (
-            f"> {self.formatTime(record, self.datefmt)} "
-            f"[{record.levelname.lower()}] "
-            f"{record.getMessage().rstrip()}"
-            f"{more}"
-        )
+        except:
+            _format = (
+                f"> {self.formatTime(record, self.datefmt)} "
+                f"[{record.levelname.lower()}] "
+                f"{record.getMessage().rstrip()}"
+                f"{more}"
+            )
         return _format
 
 
